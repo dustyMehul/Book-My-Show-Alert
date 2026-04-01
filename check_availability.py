@@ -2,20 +2,19 @@ import os
 import time
 from datetime import datetime
 from playsound import playsound
-from selenium import webdriver
-from selenium.webdriver.chrome.service import Service
+from notifier import send_telegram
+import undetected_chromedriver as uc
 from selenium.webdriver.common.by import By
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
 from selenium.common.exceptions import TimeoutException
-from webdriver_manager.chrome import ChromeDriverManager
 
 SOUND_FILE = os.path.join(os.path.dirname(__file__), "faa.mp3")
+LOG_FILE = os.path.join(os.path.dirname(__file__), "response_log.html")
 
 
 def create_driver():
-    service = Service(ChromeDriverManager().install())
-    return webdriver.Chrome(service=service)
+    return uc.Chrome(version_main=146)
 
 
 def is_booking_available(driver, url):
@@ -65,11 +64,19 @@ def is_booking_available(driver, url):
     except TimeoutException:
         print("Page did not load in time")
         return False
+    finally:
+        # Save page source for inspection
+        timestamp = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
+        with open(LOG_FILE, "w", encoding="utf-8") as f:
+            f.write(f"<!-- Captured at {timestamp} | URL: {url} -->\n")
+            f.write(driver.page_source)
 
 
 if __name__ == "__main__":
     print("Example URL: https://in.bookmyshow.com/movies/bengaluru/project-hail-mary/buytickets/ET00481564/20260403")
     url = input("Enter BookMyShow URL: ").strip()
+
+    send_telegram(f"Started monitoring: {url}")
 
     while True:
         print(f"\n[{datetime.now().strftime('%Y-%m-%d %H:%M:%S')}] Checking availability...")
@@ -77,14 +84,19 @@ if __name__ == "__main__":
         try:
             available = is_booking_available(driver, url)
         finally:
-            driver.quit()
+            try:
+                driver.quit()
+            except Exception:
+                pass
 
         print(f"Booking available: {available}")
 
         if available:
+            send_telegram(f"Booking is OPEN! Get it now: {url}")
             playsound(SOUND_FILE)
             print("Replaying in 10 mins...")
             time.sleep(600)
         else:
+            print(f"Response saved to {LOG_FILE}")
             print("Retrying in 30 mins...")
             time.sleep(1800)
