@@ -1,5 +1,6 @@
 import os
 import time
+from datetime import datetime
 from playsound import playsound
 from selenium import webdriver
 from selenium.webdriver.chrome.service import Service
@@ -71,6 +72,7 @@ if __name__ == "__main__":
     url = input("Enter BookMyShow URL: ").strip()
 
     while True:
+        print(f"\n[{datetime.now().strftime('%Y-%m-%d %H:%M:%S')}] Checking availability...")
         driver = create_driver()
         try:
             available = is_booking_available(driver, url)
