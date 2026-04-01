@@ -35,7 +35,6 @@ The date at the end of the URL (`20260403`) is the date you want to check bookin
 
 - `check_availability.py` — main script
 - `faa.mp3` — alert sound played when booking is found
-- `Book_myShow_alert.ipynb` — original notebook (sends WhatsApp alerts via pywhatkit)
 
 ## Requirements
 
