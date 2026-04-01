@@ -2,6 +2,7 @@ import os
 import time
 from datetime import datetime
 from playsound import playsound
+from notifier import send_telegram
 import undetected_chromedriver as uc
 from selenium.webdriver.common.by import By
 from selenium.webdriver.support.ui import WebDriverWait
@@ -75,6 +76,8 @@ if __name__ == "__main__":
     print("Example URL: https://in.bookmyshow.com/movies/bengaluru/project-hail-mary/buytickets/ET00481564/20260403")
     url = input("Enter BookMyShow URL: ").strip()
 
+    send_telegram(f"Started monitoring: {url}")
+
     while True:
         print(f"\n[{datetime.now().strftime('%Y-%m-%d %H:%M:%S')}] Checking availability...")
         driver = create_driver()
@@ -89,6 +92,7 @@ if __name__ == "__main__":
         print(f"Booking available: {available}")
 
         if available:
+            send_telegram(f"Booking is OPEN! Get it now: {url}")
             playsound(SOUND_FILE)
             print("Replaying in 10 mins...")
             time.sleep(600)
